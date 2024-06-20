@@ -77,7 +77,7 @@ typedef struct MyGLVertex_Norm_Tex
 class ModelShaders
 {
     public:
-        ModelShaders(QGLContext* context, DebugLogger* logger = NULL);
+        ModelShaders(QOpenGLContext* context, DebugLogger* logger = NULL);
 
         void bind(bool normal, bool textured);
         void release();
@@ -90,11 +90,11 @@ class ModelShaders
 
     protected:
 
-        QGLShaderProgram colored;
-        QGLShaderProgram colored_normal;
-        QGLShaderProgram colored_textured;
-        QGLShaderProgram colored_normal_textured;
-        QGLShaderProgram* shaders[4];
+        QOpenGLShaderProgram colored;
+        QOpenGLShaderProgram colored_normal;
+        QOpenGLShaderProgram colored_textured;
+        QOpenGLShaderProgram colored_normal_textured;
+        QOpenGLShaderProgram* shaders[4];
 
         DebugLogger dummy;
         DebugLogger* log;
@@ -103,7 +103,7 @@ class ModelShaders
 class ModelMatrixHandler
 {
     public:
-        ModelMatrixHandler(QGLContext* context_p, bool useLegacy, ModelShaders* program);
+        ModelMatrixHandler(QOpenGLContext* context_p, bool useLegacy, ModelShaders* program);
 
         void useLegacyRendering(bool use);
         void setPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
@@ -111,13 +111,15 @@ class ModelMatrixHandler
         void setView(QMatrix4x4 newView);
         void setModelPosition(float x, float y, float z, float xRot, float yRot, float zRot);
 
+        void applyMatrices();
+
     protected:
         void applyProjectionMatrix();
         void applyViewMatrix();
         void applyModelMatrix();
 
         ModelShaders* shaders;
-        QGLContext* context;
+        QOpenGLContext* context;
         bool useLegacy;
 
         QMatrix4x4 projection;
@@ -182,10 +184,10 @@ class ModelTextureGroup
         int end[4];
 };
 
-class ModelRenderer : public QGLFunctions
+class ModelRenderer : public QOpenGLFunctions
 {
     public:
-        ModelRenderer(QGLContext* glcontext, bool useLegacy, ModelShaders* _shaders = NULL, DebugLogger* logger = NULL);
+        ModelRenderer(QOpenGLContext* glcontext, bool useLegacy, ModelShaders* _shaders = NULL, DebugLogger* logger = NULL);
         ~ModelRenderer();
         void cleanup();
 

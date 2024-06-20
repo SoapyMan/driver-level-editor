@@ -1,6 +1,6 @@
 #include "ModelViewPanel.hpp"
 
-ModelViewPanel::ModelViewPanel(QWidget * parent, const QGLWidget * shareWidget, Qt::WindowFlags f, DebugLogger* logger) : QSplitter(parent)
+ModelViewPanel::ModelViewPanel(QWidget * parent, Qt::WindowFlags f, DebugLogger* logger) : QSplitter(parent)
 {
     level = NULL;
 
@@ -15,7 +15,7 @@ ModelViewPanel::ModelViewPanel(QWidget * parent, const QGLWidget * shareWidget, 
     boundsEnabled = false;
     modelRefEnabled = false;
 
-    modelView = new ModelView(this, shareWidget, f, log);
+    modelView = new ModelView(this, f, log);
 
     namesListModel = new DriverModelListModel(false,this);
     namesProxyModel = new QSortFilterProxyModel(this);
@@ -113,7 +113,7 @@ ModelViewPanel::ModelViewPanel(QWidget * parent, const QGLWidget * shareWidget, 
     QSplitterHandle *handlePointer = handle(1);
     QVBoxLayout *layout = new QVBoxLayout(handlePointer);
     layout->setSpacing(0);
-    layout->setMargin(2);
+    layout->setContentsMargins(QMargins(2, 2, 2, 2));
 
     QFrame *line = new QFrame(handlePointer);
     line->setFrameShape(QFrame::VLine);

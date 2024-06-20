@@ -1,8 +1,6 @@
 #ifndef DRIVER_D3D
 #define DRIVER_D3D
 
-#include <cstdio>
-#include <cstring>
 #include "ioFuncs.hpp"
 #include "../EventMgr.hpp"
 

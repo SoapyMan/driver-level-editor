@@ -1,8 +1,6 @@
 #ifndef WORLD_HPP
 #define WORLD_HPP
 
-#include <cstdio>
-#include <cstring>
 #include "../ioFuncs.hpp"
 #include "../../vector.hpp"
 #include "../../Log_Routines/debug_logger.hpp"

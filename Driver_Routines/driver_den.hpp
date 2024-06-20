@@ -1,8 +1,7 @@
 #ifndef DRIVER_DEN_HPP
 #define DRIVER_DEN_HPP
 
-#include <cstdlib>
-#include <cstring>
+#include <cstdio>
 #include "ioFuncs.hpp"
 
 using namespace std;

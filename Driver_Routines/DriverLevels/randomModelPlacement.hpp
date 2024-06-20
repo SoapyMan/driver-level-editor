@@ -1,8 +1,6 @@
 #ifndef RANDOM_MODEL_PLACEMENT
 #define RANDOM_MODEL_PLACEMENT
 
-#include <cstdio>
-#include <cstring>
 #include "../ioFuncs.hpp"
 #include "../../vector.hpp"
 #include "../../Log_Routines/debug_logger.hpp"

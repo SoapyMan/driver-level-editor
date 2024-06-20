@@ -15,7 +15,7 @@ class ModelViewPanel : public QSplitter, IDriverModelEvents, IDriverLevelEvents
     Q_OBJECT
 
     public:
-        ModelViewPanel(QWidget * parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0, DebugLogger* logger = NULL);
+        ModelViewPanel(QWidget * parent = 0, Qt::WindowFlags f = Qt::WindowFlags(), DebugLogger* logger = NULL);
         ~ModelViewPanel();
         ModelView* glViewer();
 

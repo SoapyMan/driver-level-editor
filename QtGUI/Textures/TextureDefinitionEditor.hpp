@@ -2,7 +2,8 @@
 #define TEXTURE_DEFINITION_EDITOR_HPP
 
 #include <QtGUI>
-#include <QtOpengl>
+#include <QtOpenGL>
+#include <QtOpenGLWidgets>
 #include "../../Driver_Routines/driver_levels.hpp"
 #include "../EventFilters.hpp"
 #include "../TextureList.hpp"
@@ -39,12 +40,12 @@ class TextureDefinitionList : public QAbstractTableModel, IDriverLevelEvents
         DriverLevel* level;
 };
 
-class OverlayedTexture : public QGLWidget
+class OverlayedTexture : public QOpenGLWidget
 {
     Q_OBJECT
 
     public:
-        OverlayedTexture(const QGLFormat& format = QGLFormat(),QWidget* parent = 0,const QGLWidget*  shareWidget = 0, Qt::WindowFlags f = 0);
+        OverlayedTexture(QWidget* parent = 0, Qt::WindowFlags f = Qt::WindowFlags());
         void setTextureProvider(TextureList* list);
 
     signals:
@@ -90,7 +91,7 @@ class TextureDefinitionEditor : public QWidget, IDriverTexDefEvents
     Q_OBJECT
 
     public:
-        TextureDefinitionEditor(QWidget* parent = 0,const QGLWidget*  shareWidget = 0, Qt::WindowFlags f = 0);
+        TextureDefinitionEditor(QWidget* parent = 0, Qt::WindowFlags f = Qt::WindowFlags());
         ~TextureDefinitionEditor();
         void setLevel(DriverLevel* lev);
         void setTextureProvider(TextureList* list);

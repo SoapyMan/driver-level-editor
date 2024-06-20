@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <cstring>
 #include "roads.hpp"
 
 RoadTable::RoadTable()

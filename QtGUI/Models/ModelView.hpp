@@ -3,16 +3,17 @@
 
 #include <QtOpenGL>
 #include <QtWidgets>
+#include <QtOpenGlWidgets>
 #include "../TextureList.hpp"
 #include "../../Driver_Routines/driver_levels.hpp"
 #include "ModelRenderer.hpp"
 
-class ModelView : public QGLWidget
+class ModelView : public QOpenGLWidget
 {
     Q_OBJECT
 
     public:
-        ModelView(QWidget * parent = 0, const QGLWidget * shareWidget = 0, Qt::WindowFlags f = 0, DebugLogger* logger = NULL);
+        ModelView(QWidget * parent = 0, Qt::WindowFlags f = Qt::WindowFlags(), DebugLogger* logger = NULL);
         ~ModelView();
 
         void setLevel(DriverLevel* lev);
@@ -29,9 +30,9 @@ class ModelView : public QGLWidget
         void initializeGL();
         void resizeGL(int width, int height);
         void paintGL();
-        void mouseMoveEvent(QMouseEvent* event);
-        void mousePressEvent(QMouseEvent* event);
-        void wheelEvent(QWheelEvent* event);
+        void mouseMoveEvent(QMouseEvent* event) override;
+        void mousePressEvent(QMouseEvent* event) override;
+        void wheelEvent(QWheelEvent* event) override;
         void rebuildModelRenderer();
 
         DebugLogger dummy;
@@ -47,10 +48,12 @@ class ModelView : public QGLWidget
         int eventModelIndex;
         bool viewingEvent;
         bool legacyRendering;
-        QPoint lastPoint;
+        QPointF lastPoint;
         double wheelSensitivity;
         double mouseSensitivity;
         double zoomSensitivity;
+
+        QTimer timer;
 };
 
 class RenderOptionsWidget : public QWidget

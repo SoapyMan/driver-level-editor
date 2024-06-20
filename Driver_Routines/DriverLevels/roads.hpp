@@ -1,9 +1,6 @@
 #ifndef INTERSECTIONS_HPP
 #define INTERSECTIONS_HPP
 
-#include <iostream>
-#include <cstdio>
-#include <cstring>
 #include "../../vector.hpp"
 #include "../ioFuncs.hpp"
 #include "../../Log_Routines/debug_logger.hpp"

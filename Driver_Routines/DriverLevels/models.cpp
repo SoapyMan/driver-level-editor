@@ -1,3 +1,4 @@
+#include <cstring>
 #include "models.hpp"
 
 ModelNames::ModelNames()
@@ -433,6 +434,28 @@ const int faceTypeSize[56] = {12,16,20,28,20,24,28,36, 0, 0, 0, 0, 0, 0, 0, 0,
                               12,16,20,28,20,24,28,36, 0, 0, 0, 0, 0, 0, 0, 0,
                               16,16,20,24,20,24,24,32};
 
+struct MODEL
+{
+    short	    version_number;
+    uint16_t    shape_flags;
+    int		    instance_number;
+    uint16_t    flags2;
+    short   	collision_parent;
+    float   	bounding_sphere;
+    float   	bounding_sphere2d;
+    uint16_t    num_vertices;
+    uint16_t    num_polys;
+    uint16_t    num_point_normals;
+    uint16_t    num_texture_sets;
+    int         texture_set_info;
+    int         vertices;
+    int         normals;
+    int         point_normals;
+    int         poly_block;
+    int         BSP_data;
+    int         collision_block;
+};
+
 //Converts a model from the level file format into a more manageable format.
 //Returns size of model data read on success or -1 if data read will exceed size argument.
 int DriverModel::convertFromLevelFormat(unsigned char* data, int size, DebugLogger* log)
@@ -445,12 +468,13 @@ int DriverModel::convertFromLevelFormat(unsigned char* data, int size, DebugLogg
     boundsDirty = true;
     centerDirty = true;
 
-    int totalSize = 56;
-    if(size < totalSize)
+    if(size < sizeof(MODEL))
     {
         log->Log("ERROR: Data to be read for model exceeds size arg.");
         return -1;
     }
+
+    MODEL* model = (MODEL*)data;
 
     flags1 = *(int*)(data);
     modelRef = *(int*)(data+4);
@@ -463,15 +487,17 @@ int DriverModel::convertFromLevelFormat(unsigned char* data, int size, DebugLogg
     numNormals = *(short*)(data+24);
     numTexturesUsed = *(short*)(data+26);
 
-    unsigned char* textureData = (unsigned char*)(*(int*)(data+28)+(long int)(data));
-    unsigned char* vertexData = (unsigned char*)(*(int*)(data+32)+(long int)(data));
-    unsigned char* cullingData = (unsigned char*)(*(int*)(data+36)+(long int)(data));
-    unsigned char* normalData = (unsigned char*)(*(int*)(data+40)+(long int)(data));
-    unsigned char* faceData = (unsigned char*)(*(int*)(data+44)+(long int)(data));
+    unsigned char* textureData = (unsigned char*)(*(int*)(data+28)+(data));
+    unsigned char* vertexData = (unsigned char*)(*(int*)(data+32)+(data));
+    unsigned char* cullingData = (unsigned char*)(*(int*)(data+36)+(data));
+    unsigned char* normalData = (unsigned char*)(*(int*)(data+40)+(data));
+    unsigned char* faceData = (unsigned char*)(*(int*)(data+44)+(data));
     unsigned char* collisionData = NULL;
+
+    int totalSize = 56;
     if(*(int*)(data+52) != 0)
     {
-        collisionData = (unsigned char*)(*(int*)(data+52)+(long int)(data));
+        collisionData = (unsigned char*)(*(int*)(data+52)+(data));
         numCollisionBounds = *(int*)(collisionData);
         collisionData += 4;
         totalSize += 4;
@@ -879,16 +905,16 @@ void DriverModel::convertToLevelFormat(unsigned char* data) const
     *(int*)(data+48) = 0;
     *(int*)(data+44) = offset;
 
-    unsigned char* textureData = (unsigned char*)(*(int*)(data+28)+(long int)(data));
-    unsigned char* vertexData = (unsigned char*)(*(int*)(data+32)+(long int)(data));
-    unsigned char* cullingData = (unsigned char*)(*(int*)(data+36)+(long int)(data));
-    unsigned char* normalData = (unsigned char*)(*(int*)(data+40)+(long int)(data));
-    unsigned char* faceData = (unsigned char*)(*(int*)(data+44)+(long int)(data));
+    unsigned char* textureData = (unsigned char*)(*(int*)(data+28)+(data));
+    unsigned char* vertexData = (unsigned char*)(*(int*)(data+32)+(data));
+    unsigned char* cullingData = (unsigned char*)(*(int*)(data+36)+(data));
+    unsigned char* normalData = (unsigned char*)(*(int*)(data+40)+(data));
+    unsigned char* faceData = (unsigned char*)(*(int*)(data+44)+(data));
     unsigned char* collisionData = NULL;
 
     if(*(int*)(data+52) != 0)
     {
-        collisionData = (unsigned char*)(*(int*)(data+52)+(long int)(data));
+        collisionData = (unsigned char*)(*(int*)(data+52)+(data));
         *(int*)(collisionData) = numCollisionBounds;
         collisionData += 4;
     }

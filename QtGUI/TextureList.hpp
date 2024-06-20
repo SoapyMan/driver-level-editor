@@ -1,10 +1,12 @@
 #ifndef TEXTURE_LIST_HPP
 #define TEXTURE_LIST_HPP
 
+#include <QtGUI>
 #include "../Driver_Routines/driver_levels.hpp"
 #include "../Driver_Routines/driver_d3d.hpp"
-#include <gl/GL.h>
-#include <QtGUI>
+
+class DriverTextures;
+class DriverD3D;
 
 class TexEntry
 {

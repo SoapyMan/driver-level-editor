@@ -2,12 +2,12 @@
 #define TEXTURE_VIEW_HPP
 
 #include <QtWidgets>
-#include <QGLWidget>
+#include <QtOpenGlWidgets>
 #include <vector>
 #include "../TextureList.hpp"
 #include "../../Driver_Routines/driver_levels.hpp"
 
-class TextureViewGL : public QGLWidget, IDriverTextureEvents
+class TextureViewGL : public QOpenGLWidget, IDriverTextureEvents
 {
     Q_OBJECT
 
@@ -41,8 +41,7 @@ class TextureViewGL : public QGLWidget, IDriverTextureEvents
         };
 
     public:
-        TextureViewGL(QWidget* parent = NULL, const QGLWidget * shareWidget = NULL, Qt::WindowFlags f = 0);
-        TextureViewGL(const QGLFormat& format,QWidget* parent = NULL, const QGLWidget * shareWidget = NULL, Qt::WindowFlags f = 0);
+        TextureViewGL(QWidget* parent = NULL, Qt::WindowFlags f = Qt::WindowFlags());
         ~TextureViewGL();
 
         QSize minimumSizeHint() const;
@@ -128,8 +127,7 @@ class TextureView : public QAbstractScrollArea
     Q_OBJECT
 
     public:
-        TextureView(QWidget* parent = NULL, const QGLWidget * shareWidget = NULL, Qt::WindowFlags f = 0);
-        TextureView(const QGLFormat& format,QWidget* parent = NULL, const QGLWidget * shareWidget = NULL, Qt::WindowFlags f = 0);
+        TextureView(QWidget* parent = NULL, Qt::WindowFlags f = Qt::WindowFlags());
         ~TextureView();
         void setup();
 

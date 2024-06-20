@@ -44,7 +44,7 @@ QVariant PaletteViewModel::data(const QModelIndex &index, int role) const
     {
         return QSize(gridSize,gridSize);
     }
-    else if(role == Qt::BackgroundColorRole)
+    else if(role == Qt::BackgroundRole)
     {
         if(index.row() >= 0 && index.row() < rowCount() && index.column() >= 0 && index.column() < columnCount())
         {

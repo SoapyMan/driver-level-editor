@@ -1,3 +1,4 @@
+#include <cstdarg>
 #include "default_loggers.hpp"
 
 CmdLogger::CmdLogger()

@@ -1,3 +1,6 @@
+#include <windows.h>
+#include <FreeImage.h>
+
 #include "MainWindow.hpp"
 
 DebugLogger* FreeImageLogger = NULL; //Don't like using globals like this, but can't pass class member function to FreeImage.
@@ -35,15 +38,19 @@ MainWindow::MainWindow() : playerCosmetics(18), civilianCosmetics(12)
     levelTextures.setTextureProvider(&level.textures);
     levelTextures.setD3D(&d3d);
 
-    if(QDir("./settings").exists())
+    QDir settingsDir = QDir::currentPath() + "/settings";
+    settingsDir.mkpath(".");
+
+    mainLog.Log("Current path is %s", QDir::currentPath().toLocal8Bit().data());
+
+    if(settingsDir.exists())
     {
         mainLog.Log("Settings folder exists in working directory, settings will be saved portably.");
-        if(!QDir("./settings/User").exists())
-            QDir().mkdir("./settings/User");
-        if(!QDir("./settings/System").exists())
-            QDir().mkdir("./settings/System");
-        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "./settings/User");
-        QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, "./settings/System");
+        settingsDir.mkpath("user");
+        settingsDir.mkpath("system");
+
+        QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDir.absoluteFilePath("user"));
+        QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, settingsDir.absoluteFilePath("system"));
     }
     else mainLog.Log("No settings folder found. Saving settings locally.");
 
@@ -76,16 +83,15 @@ MainWindow::MainWindow() : playerCosmetics(18), civilianCosmetics(12)
     aboutDialog->setThanks(tr("Thanks goes here!"));
     aboutDialog->setImage("data/about.png");
 
-    modelViewPanel = new ModelViewPanel(this, NULL, 0, &mainLog);
+    modelViewPanel = new ModelViewPanel(this, Qt::WindowFlags(), &mainLog);
     modelViewPanel->setLevel(&level);
     modelViewPanel->setTextureProvider(&levelTextures);
 
-    definitionEditor = new TextureDefinitionEditor(this, modelViewPanel->glViewer()); //Don't forget, this needs a share widget when model viewing is done
+    definitionEditor = new TextureDefinitionEditor(this, Qt::WindowFlags()); //Don't forget, this needs a share widget when model viewing is done
     definitionEditor->setLevel(&level);
     definitionEditor->setTextureProvider(&levelTextures);
-    definitionEditor->overlay()->makeCurrent();
 
-    textureBrowser = new TextureBrowser(this, modelViewPanel->glViewer());
+    textureBrowser = new TextureBrowser(this, Qt::WindowFlags());
     textureBrowser->setLevel(&level);
     textureBrowser->setTextureList(&levelTextures);
     textureBrowser->setD3D(&d3d);
@@ -178,8 +184,9 @@ void MainWindow::loadSettings()
             frameBottom = abs(frameGeometry().bottom()-geometry().bottom());
         }
 
+        /*
         //Ensure sane positioning for first run (i.e. not split across multiple monitors
-        QDesktopWidget* desk = QApplication::desktop();
+        QDesktopWidget* desk = QApplication::topLevelWidgets();
         int usedScreen = 0;
         const QRect available = desk->availableGeometry(usedScreen);
         if((available.x()+available.width())/2 >= defaultSize.width()/2+frameWidth/2)
@@ -201,6 +208,7 @@ void MainWindow::loadSettings()
             defaultSize.setHeight(available.height()-(frameTop+frameBottom));
         }
         mainLog.Log("Positioning window at (%d, %d) with size (%d, %d) on screen %d/%d",defaultPosition.x(),defaultPosition.y(),defaultSize.width(),defaultSize.height(),usedScreen,desk->screenCount());
+        */
     }
 
     mainLog.setLogPriority(settings.value("LoggingLevels/mainLog",DEFAULT_PRIORITY).toInt());
@@ -630,9 +638,9 @@ void MainWindow::installPatch()
 
     if(ret == QMessageBox::Yes)
     {
-
-        mkdir(QDir::toNativeSeparators(directory+"\\DCI_Backup").toLocal8Bit().data());
-        mkdir(QDir::toNativeSeparators(directory+"\\DCI_Backup\\Levels").toLocal8Bit().data());
+        QDir backupDir = QDir::toNativeSeparators(directory + "\\DCI_Backup\\Levels");
+        if (!backupDir.exists())
+            backupDir.mkpath(".");
 
         const char* backup_files[] = {"\\Game.exe","\\Levels\\Miami_01.den","\\Levels\\NC_01.den"};
         for(int i = 0; i < 3; i++)
@@ -654,14 +662,41 @@ void MainWindow::installPatch()
         }
     }
 
-    const char* patch_files[] = {"Vertex_Patch\\Game.exe","Vertex_Patch\\Levels\\pcar_miami.den","Vertex_Patch\\Levels\\pcar_frisco.den","Vertex_Patch\\Levels\\pcar_la.den",
-                                 "Vertex_Patch\\Levels\\pcar_ny.den","Vertex_Patch\\Levels\\pcar_train.den","Vertex_Patch\\Levels\\pcar_iview.den","Vertex_Patch\\Levels\\pcar_nc.den",
-                                 "Vertex_Patch\\Levels\\miami_01.den","Vertex_Patch\\Levels\\frisco_01.den","Vertex_Patch\\Levels\\la_01.den","Vertex_Patch\\Levels\\ny_01.den",
-                                 "Vertex_Patch\\Levels\\iview.den","Vertex_Patch\\Levels\\train.den","Vertex_Patch\\Levels\\nc_01.den"};
-    const char* dest_files[] = {"\\Game.exe","\\Levels\\pcar_miami.den","\\Levels\\pcar_frisco.den","\\Levels\\pcar_la.den",
-                                "\\Levels\\pcar_ny.den","\\Levels\\pcar_train.den","\\Levels\\pcar_iview.den","\\Levels\\pcar_nc.den",
-                                "\\Levels\\miami_01.den","\\Levels\\frisco_01.den","\\Levels\\la_01.den","\\Levels\\ny_01.den",
-                                "\\Levels\\iview.den","\\Levels\\train.den","\\Levels\\nc_01.den"};
+    const char* patch_files[] = {
+        "Vertex_Patch\\Game.exe",
+        "Vertex_Patch\\Levels\\pcar_miami.den",
+        "Vertex_Patch\\Levels\\pcar_frisco.den",
+        "Vertex_Patch\\Levels\\pcar_la.den",
+        "Vertex_Patch\\Levels\\pcar_ny.den",
+        "Vertex_Patch\\Levels\\pcar_train.den",
+        "Vertex_Patch\\Levels\\pcar_iview.den",
+        "Vertex_Patch\\Levels\\pcar_nc.den",
+        "Vertex_Patch\\Levels\\miami_01.den",
+        "Vertex_Patch\\Levels\\frisco_01.den",
+        "Vertex_Patch\\Levels\\la_01.den",
+        "Vertex_Patch\\Levels\\ny_01.den",
+        "Vertex_Patch\\Levels\\iview.den",
+        "Vertex_Patch\\Levels\\train.den",
+        "Vertex_Patch\\Levels\\nc_01.den"
+    };
+    const char* dest_files[] = {
+        "\\Game.exe",
+        "\\Levels\\pcar_miami.den",
+        "\\Levels\\pcar_frisco.den",
+        "\\Levels\\pcar_la.den",
+        "\\Levels\\pcar_ny.den",
+        "\\Levels\\pcar_train.den",
+        "\\Levels\\pcar_iview.den",
+        "\\Levels\\pcar_nc.den",
+        "\\Levels\\miami_01.den",
+        "\\Levels\\frisco_01.den",
+        "\\Levels\\la_01.den",
+        "\\Levels\\ny_01.den",
+        "\\Levels\\iview.den",
+        "\\Levels\\train.den",
+        "\\Levels\\nc_01.den"
+    };
+
     mainLog.Log("Installing vertex patch to %s.",directory.toLocal8Bit().data());
     for(int i = 0; i < 15; i++)
     {

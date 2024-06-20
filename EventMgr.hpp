@@ -10,7 +10,6 @@
 
 #include <list>
 #include <algorithm>
-#include <functional>
 using namespace std;
 
 //////////////////
@@ -25,7 +24,7 @@ using namespace std;
 // - Clients derive from event interface and override event handlers. Clients
 //   call Register/Unregister to add/remove themselves.
 //
-#include <iostream>
+
 template <typename I>
 class CEventMgr
 {
@@ -78,7 +77,7 @@ protected:																	\
 // Event with no args: Declare OnFoo handler and Foo functor.
 #define DEFINE_EVENT0(iface,name)									\
 virtual void name() { };											\
-class name##Functor : public unary_function<iface*, void> {				\
+class name##Functor {				\
 public:																		\
 	name##Functor() { }																\
 	void operator()(iface* obj)										\
@@ -90,10 +89,9 @@ public:																		\
 // Event with one arg: Declare OnFoo handler and Foo functor.
 #define DEFINE_EVENT1(iface,name,T1)								\
 virtual void name(T1) { }											\
-class name##Functor : public unary_function<iface*, void> {				\
-protected:																	\
+class name##Functor {				\
+public:																	\
 	T1 m_arg1;																\
-public:																		\
 	name##Functor(T1 a1) : m_arg1(a1) { }										\
 	void operator()(iface* obj)										\
 	{																			\
@@ -105,11 +103,10 @@ public:																		\
 // Event with two args: Declare OnFoo handler and Foo functor.
 #define DEFINE_EVENT2(iface,name,T1,T2)							\
 virtual void name(T1, T2) { }									\
-class name##Functor : public unary_function<iface*, void> {				\
-protected:																	\
+class name##Functor {				\
+public:																	\
 	T1 m_arg1;																\
 	T2 m_arg2;																\
-public:																		\
 	name##Functor(T1 a1, T2 a2) : m_arg1(a1), m_arg2(a2) { }				\
 	void operator()(iface* obj)										\
 	{																			\

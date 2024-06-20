@@ -2,7 +2,7 @@
 #define TEXTURE_BROWSER_HPP
 
 #include <QtGUI>
-#include <QGLWidget>
+#include <QtOpenGLWidgets>
 #include <FreeImage.h>
 #include "../../Driver_Routines/driver_levels.hpp"
 #include "../Palettes/AddPaletteDialog.hpp"
@@ -45,8 +45,7 @@ class TextureBrowser : public QWidget, IDriverTextureEvents, IDriverLevelEvents
     Q_OBJECT
 
     public:
-        TextureBrowser(QWidget* parent = NULL, const QGLWidget * shareWidget = NULL, Qt::WindowFlags f = 0);
-        TextureBrowser(const QGLFormat& format,QWidget* parent = NULL, const QGLWidget * shareWidget = NULL, Qt::WindowFlags f = 0);
+        TextureBrowser(QWidget* parent = NULL, Qt::WindowFlags f = Qt::WindowFlags());
         ~TextureBrowser();
         void setTextureList(LevelTextures* texs);
         void setLevel(DriverLevel* lev);

@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <cstring>
+
 #include "chairs.hpp"
 
 DriverChair::DriverChair()

@@ -2,9 +2,6 @@
 #define MAINWINDOW_HPP
 
 #include <QtGUI>
-#include <windows.h>
-#include <dir.h>
-#include <FreeImage.h>
 
 #include "Driver_Routines/driver_levels.hpp"
 #include "Driver_Routines/driver_d3d.hpp"

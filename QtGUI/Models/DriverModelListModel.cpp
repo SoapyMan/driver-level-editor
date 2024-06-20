@@ -56,7 +56,7 @@ QVariant DriverModelListModel::data(const QModelIndex &index, int role) const
 
             if(model)
             {
-                if(role == Qt::BackgroundColorRole)
+                if(role == Qt::BackgroundRole)
                 {
                     if(model->getModelReference() != -1)
                         return QColor(255,100,100);

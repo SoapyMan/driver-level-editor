@@ -1,6 +1,5 @@
 #ifndef IO_FUNCS_HPP
 #define IO_FUNCS_HPP
-#include <cstdio>
 
 typedef void* IOHandle;
 

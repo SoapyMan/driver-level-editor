@@ -1,9 +1,6 @@
 #ifndef MODEL_NAMES_HPP
 #define MODEL_NAMES_HPP
 
-#include <iostream>
-#include <cstdio>
-#include <cstring>
 #include "../ioFuncs.hpp"
 #include "../../Log_Routines/debug_logger.hpp"
 #include "../../vector.hpp"

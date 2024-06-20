@@ -1,9 +1,6 @@
 #ifndef TEXTURES_HPP
 #define TEXTURES_HPP
 
-#include <iostream>
-#include <cstring>
-#include <cstdio>
 #include "../ioFuncs.hpp"
 #include "../../EventMgr.hpp"
 #include "../../Log_Routines/debug_logger.hpp"

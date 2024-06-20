@@ -276,7 +276,8 @@ int TextureDefinitionList::insertDefinition(int position,TextureDefinition def)
     return position;
 };
 
-OverlayedTexture::OverlayedTexture(const QGLFormat& glform,QWidget* parent,const QGLWidget*  shareWidget, Qt::WindowFlags f) : QGLWidget(glform,parent,shareWidget,f)
+OverlayedTexture::OverlayedTexture(QWidget* parent, Qt::WindowFlags f)
+    : QOpenGLWidget(parent, f)
 {
     x = 0;
     y = 0;
@@ -291,19 +292,19 @@ OverlayedTexture::OverlayedTexture(const QGLFormat& glform,QWidget* parent,const
     enabled = false;
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
-    setAutoBufferSwap(false);
+    //setAutoBufferSwap(false);
 };
 
 void OverlayedTexture::setTextureProvider(TextureList* list)
 {
     texlist = list;
-    updateGL();
+    update();
 };
 
 void OverlayedTexture::setTexture(int idx)
 {
     texidx = idx;
-    updateGL();
+    update();
 };
 
 void OverlayedTexture::setOverlayRect(int nx,int ny,int nw,int nh)
@@ -312,7 +313,7 @@ void OverlayedTexture::setOverlayRect(int nx,int ny,int nw,int nh)
     y = ny;
     w = nw;
     h = nh;
-    updateGL();
+    update();
 };
 
 void OverlayedTexture::resizeGL(int width, int height)
@@ -322,7 +323,7 @@ void OverlayedTexture::resizeGL(int width, int height)
     glViewport(0,0,width,height);
     glOrtho(0, width, 0, height, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-    updateGL();
+    update();
 };
 
 void OverlayedTexture::initializeGL()
@@ -388,13 +389,13 @@ void OverlayedTexture::paintGL()
         glEnable(GL_DEPTH_TEST);
     }
 
-    swapBuffers();
+    //swapBuffers();
 };
 
 void OverlayedTexture::setOverlayEnabled(bool en)
 {
     enabled = en;
-    updateGL();
+    update();
 };
 
 
@@ -679,7 +680,7 @@ void OverlayedTexture::mouseMoveEvent(QMouseEvent *event)
     else setCursor(Qt::ArrowCursor);
 };
 
-TextureDefinitionEditor::TextureDefinitionEditor(QWidget* parent,const QGLWidget*  shareWidget, Qt::WindowFlags f) : QWidget(parent)
+TextureDefinitionEditor::TextureDefinitionEditor(QWidget* parent, Qt::WindowFlags f) : QWidget(parent, f)
 {
     level = NULL;
     texList = NULL;
@@ -704,9 +705,7 @@ TextureDefinitionEditor::TextureDefinitionEditor(QWidget* parent,const QGLWidget
     contextmenu->addAction(deleteAction);
     contextmenu->addAction(insertAction);
 
-    QGLFormat form;
-    form.setDoubleBuffer(true);
-    overlayedTex = new OverlayedTexture(form,this,shareWidget,f);
+    overlayedTex = new OverlayedTexture(this, f);
     overlayedTex->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
     QGridLayout* layout = new QGridLayout();
@@ -833,7 +832,7 @@ void TextureDefinitionEditor::setLevel(DriverLevel* lev)
 
     overlayedTex->setOverlayEnabled(false);
     texDefsView->reset();
-    overlayedTex->updateGL();
+    overlayedTex->update();
 };
 
 OverlayedTexture* TextureDefinitionEditor::overlay()
@@ -869,5 +868,5 @@ void TextureDefinitionEditor::definitionsDestroyed()
     level = NULL;
     overlayedTex->setOverlayEnabled(false);
     texDefsView->reset();
-    overlayedTex->updateGL();
+    overlayedTex->update();
 };

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "ioFuncs.hpp"
 
 size_t freadWrapper(void *ptr, size_t size, size_t nmemb, IOHandle handle)

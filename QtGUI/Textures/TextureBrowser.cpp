@@ -31,15 +31,9 @@ void NewTextureDialog::doneButtonPushed()
     accept();
 };
 
-TextureBrowser::TextureBrowser(QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f) : QWidget(parent)
+TextureBrowser::TextureBrowser(QWidget* parent, Qt::WindowFlags f) : QWidget(parent)
 {
-    display = new TextureView(this,shareWidget,f);
-    setup();
-};
-
-TextureBrowser::TextureBrowser(const QGLFormat& format,QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f) : QWidget(parent)
-{
-    display = new TextureView(format,this,shareWidget,f);
+    display = new TextureView(this,f);
     setup();
 };
 
@@ -56,7 +50,7 @@ void TextureBrowser::setup()
 
     pairAdvisoryWidget = new QWidget(this);
     QPalette pal = pairAdvisoryWidget->palette();
-    pal.setBrush(QPalette::Background, QColor(255,70,60));
+    pal.setBrush(QPalette::Base, QColor(255,70,60));
     pairAdvisoryWidget->setAutoFillBackground(true);
     pairAdvisoryWidget->setPalette(pal);
     pairAdvisoryWidget->hide();
@@ -64,7 +58,7 @@ void TextureBrowser::setup()
     pairAdvisoryText = new QLabel(tr(" *Warning: Paletted textures need paired."),this);
     pairAdvisoryButton = new QPushButton(tr("Pair Now"),this);
     QHBoxLayout* pairLayout = new QHBoxLayout();
-    pairLayout->setMargin(0);
+    pairLayout->setContentsMargins(QMargins(0,0,0,0));
     pairLayout->addWidget(pairAdvisoryText, 1, Qt::AlignLeft);
     pairLayout->addWidget(pairAdvisoryButton, 0, Qt::AlignRight);
     pairAdvisoryWidget->setLayout(pairLayout);
@@ -528,7 +522,7 @@ bool TextureBrowser::eventFilter(QObject* obj, QEvent* event)
             QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
             if(displayControl)
             {
-                int numDegrees = wheelEvent->delta() / 8;
+                int numDegrees = wheelEvent->angleDelta().y() / 8;
                 int numSteps = numDegrees / 15;
 
                 if(textureSizeSelect->currentIndex() > 0 && numSteps < 0)

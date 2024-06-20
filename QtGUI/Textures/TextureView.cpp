@@ -98,12 +98,8 @@ int TextureViewGL::TexturePositioner::getGridY() const
     return gridY;
 };
 
-TextureViewGL::TextureViewGL(QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f) : QGLWidget(parent,shareWidget,f)
-{
-    setup();
-};
-
-TextureViewGL::TextureViewGL(const QGLFormat& format,QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f) : QGLWidget(format,parent,shareWidget,f)
+TextureViewGL::TextureViewGL(QWidget* parent, Qt::WindowFlags f)
+    : QOpenGLWidget(parent,f)
 {
    setup();
 };
@@ -129,8 +125,8 @@ void TextureViewGL::setup()
     textures = NULL;
     textureList = NULL;
 
-    timeKeeper = QTime(0,0);
-    timeKeeper.start();
+    timeKeeper = timeKeeper.currentTime();
+
     timer.setInterval(16);
     timer.setSingleShot(false);
     for(int i = 0; i < 256; i++)
@@ -154,7 +150,6 @@ void TextureViewGL::initializeGL()
 
 void TextureViewGL::resizeGL(int width, int height)
 {
-    makeCurrent();
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glViewport(0,0,width,height);
@@ -245,8 +240,8 @@ void TextureViewGL::paintGL()
         drawPositioner(heldPositioner,currentTime);
     }
 
-    if(!autoBufferSwap())
-    swapBuffers();
+    //if(!autoBufferSwap())
+    //swapBuffers();
 };
 
 //Overloaded QWidget functions and events
@@ -543,7 +538,7 @@ void TextureViewGL::mouseReleaseEvent(QMouseEvent* event)
 void TextureViewGL::resizeEvent(QResizeEvent* event)
 {
     rebuildView();
-    QGLWidget::resizeEvent(event);
+    QOpenGLWidget::resizeEvent(event);
 };
 
 void TextureViewGL::keyPressEvent(QKeyEvent* event)
@@ -652,7 +647,7 @@ int TextureViewGL::getVerticalScrollStep()
 
 int TextureViewGL::getMilliseconds()
 {
-    return timeKeeper.elapsed();
+    return timeKeeper.msec();
 };
 
 void TextureViewGL::checkTimer()
@@ -961,18 +956,12 @@ void TextureViewGL::texturesOpened()
     rebuildView();
 };
 
-TextureView::TextureView(QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f) : QAbstractScrollArea(parent)
+TextureView::TextureView(QWidget* parent, Qt::WindowFlags f)
+    : QAbstractScrollArea(parent)
 {
-    glView = new TextureViewGL(this,shareWidget,f);
+    glView = new TextureViewGL(this,f);
     setup();
 };
-
-TextureView::TextureView(const QGLFormat& format,QWidget* parent, const QGLWidget * shareWidget, Qt::WindowFlags f) : QAbstractScrollArea(parent)
-{
-    glView = new TextureViewGL(format,this,shareWidget,f);
-    setup();
-};
-
 TextureView::~TextureView()
 {
 

@@ -1,7 +1,5 @@
 #ifndef DEBUG_LOGGER_HPP
 #define DEBUG_LOGGER_HPP
-#include <cstdarg>
-#include <cstdio>
 
 const int DEFAULT_PRIORITY = 2;
 const int DEBUG_LEVEL_NONE = -1;

@@ -1,3 +1,4 @@
+#include <cstring>
 #include "driver_den.hpp"
 
 DentingSection::DentingSection()

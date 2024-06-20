@@ -5,8 +5,7 @@ PFNGLDELETEVERTEXARRAYSPROC myGlDeleteVertexArrays = NULL;
 PFNGLGENVERTEXARRAYSPROC myGlGenVertexArrays = NULL;
 
 
-ModelShaders::ModelShaders(QGLContext* context, DebugLogger* logger) :
-    colored(context, NULL), colored_normal(context, NULL), colored_textured(context, NULL), colored_normal_textured(context, NULL)
+ModelShaders::ModelShaders(QOpenGLContext* context, DebugLogger* logger)
 {
     if(logger)
         log = logger;
@@ -28,14 +27,14 @@ int ModelShaders::initializeShaders()
 
     for(int i = 0; i < 4; i++)
     {
-        bool success = shaders[i]->addShaderFromSourceFile(QGLShader::Vertex, vertexShaderFilenames[i]);
+        bool success = shaders[i]->addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShaderFilenames[i]);
         if(!success)
         {
             ret = 1+i*4;
             log->Log("WARNING: Could not create vertex shader %d: %s", i, shaders[i]->log().toLocal8Bit().data());
         }
 
-        success = shaders[i]->addShaderFromSourceFile(QGLShader::Fragment, fragmentShaderFilenames[i]);
+        success = shaders[i]->addShaderFromSourceFile(QOpenGLShader::Fragment, fragmentShaderFilenames[i]);
         if(!success)
         {
             ret = 2+i*4;
@@ -105,7 +104,7 @@ void ModelShaders::setModelMatrix(QMatrix4x4 model)
     }
 };
 
-ModelMatrixHandler::ModelMatrixHandler(QGLContext* glcontext, bool legacy, ModelShaders* program)
+ModelMatrixHandler::ModelMatrixHandler(QOpenGLContext* glcontext, bool legacy, ModelShaders* program)
 {
     useLegacy = legacy;
     shaders = program;
@@ -113,9 +112,6 @@ ModelMatrixHandler::ModelMatrixHandler(QGLContext* glcontext, bool legacy, Model
     model.setToIdentity();
     projection.setToIdentity();
     view.setToIdentity();
-    applyProjectionMatrix();
-    applyViewMatrix();
-    applyModelMatrix();
 };
 
 void ModelMatrixHandler::useLegacyRendering(bool use)
@@ -127,20 +123,17 @@ void ModelMatrixHandler::setPerspective(GLdouble fovy, GLdouble aspect, GLdouble
 {
     projection.setToIdentity();
     projection.perspective(fovy,aspect,zNear,zFar);
-    applyProjectionMatrix();
 };
 
 void ModelMatrixHandler::setFrustum(GLdouble left, GLdouble right, GLdouble top, GLdouble bottom, GLdouble zNear, GLdouble zFar)
 {
     projection.setToIdentity();
     projection.frustum(left,right,bottom,top,zNear,zFar);
-    applyProjectionMatrix();
 };
 
 void ModelMatrixHandler::setView(QMatrix4x4 newView)
 {
     view = newView;
-    applyViewMatrix();
 };
 
 void ModelMatrixHandler::setModelPosition(float x, float y, float z, float xRot, float yRot, float zRot)
@@ -150,25 +143,20 @@ void ModelMatrixHandler::setModelPosition(float x, float y, float z, float xRot,
     model.rotate(xRot, 1.0, 0.0, 0.0);
     model.rotate(yRot, 0.0, 1.0, 0.0);
     model.translate(x,y,z);
-    applyModelMatrix();
 };
+
+void ModelMatrixHandler::applyMatrices()
+{
+    applyProjectionMatrix();
+    applyViewMatrix();
+}
 
 void ModelMatrixHandler::applyProjectionMatrix()
 {
-    if(context)
-        context->makeCurrent();
     if(useLegacy == true)
     {
         glMatrixMode(GL_PROJECTION);
-        GLdouble mat[16];
-        for(int i = 0; i < 4; i++)
-        {
-            for(int j = 0; j < 4; j++)
-            {
-                mat[i*4+j] = projection(j,i);
-            }
-        }
-        glLoadMatrixd(mat);
+        glLoadMatrixf(projection.data());
         glMatrixMode(GL_MODELVIEW);
     }
     else
@@ -180,21 +168,11 @@ void ModelMatrixHandler::applyProjectionMatrix()
 
 void ModelMatrixHandler::applyViewMatrix()
 {
-    if(context)
-        context->makeCurrent();
     if(useLegacy == true)
     {
         glMatrixMode(GL_MODELVIEW);
         QMatrix4x4 temp = view*model;
-        GLdouble mat[16];
-        for(int i = 0; i < 4; i++)
-        {
-            for(int j = 0; j < 4; j++)
-            {
-                mat[i*4+j] = temp(j,i);
-            }
-        }
-        glLoadMatrixd(mat);
+        glLoadMatrixf(temp.data());
     }
     else
     {
@@ -205,21 +183,11 @@ void ModelMatrixHandler::applyViewMatrix()
 
 void ModelMatrixHandler::applyModelMatrix()
 {
-    if(context)
-        context->makeCurrent();
     if(useLegacy == true)
     {
         glMatrixMode(GL_MODELVIEW);
         QMatrix4x4 temp = view*model;
-        GLdouble mat[16];
-        for(int i = 0; i < 4; i++)
-        {
-            for(int j = 0; j < 4; j++)
-            {
-                mat[i*4+j] = temp(j,i);
-            }
-        }
-        glLoadMatrixd(mat);
+        glLoadMatrixf(temp.data());
     }
     else
     {
@@ -439,7 +407,8 @@ void BasicCamera::buildMatrix()
     }
 };
 
-ModelRenderer::ModelRenderer(QGLContext* context, bool useLegacy, ModelShaders* _shaders, DebugLogger* logger) : QGLFunctions(context)
+ModelRenderer::ModelRenderer(QOpenGLContext* context, bool useLegacy, ModelShaders* _shaders, DebugLogger* logger)
+    : QOpenGLFunctions(context)
 {
     numTextureGroups = 0;
     hasNonTextured = false;

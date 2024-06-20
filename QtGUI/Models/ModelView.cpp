@@ -1,6 +1,7 @@
 #include "ModelView.hpp"
 
-ModelView::ModelView(QWidget * parent, const QGLWidget * shareWidget, Qt::WindowFlags f, DebugLogger* logger) : QGLWidget(parent, shareWidget, f)
+ModelView::ModelView(QWidget * parent, Qt::WindowFlags f, DebugLogger* logger)
+    : QOpenGLWidget(parent, f)
 {
     if(logger)
         log = logger;
@@ -23,7 +24,7 @@ ModelView::ModelView(QWidget * parent, const QGLWidget * shareWidget, Qt::Window
     camera.setCameraMode(CAMERA_FOCAL_POINT);
     camera.setDistance(2000);
     camera.setYaw(45.0);
-    camera.setPitch(45.0);
+    camera.setPitch(-45.0);
     camera.setRoll(180.0);
 };
 
@@ -67,21 +68,21 @@ void ModelView::setModelIndex(int idx)
 {
     modelIndex = idx;
     rebuildModelRenderer();
-    updateGL();
+    update();
 };
 
 void ModelView::setEventModelIndex(int idx)
 {
     eventModelIndex = idx;
     rebuildModelRenderer();
-    updateGL();
+    update();
 };
 
 void ModelView::viewEventModels(bool view)
 {
     viewingEvent = view;
     rebuildModelRenderer();
-    updateGL();
+    update();
 };
 
 void ModelView::rebuildModelRenderer()
@@ -118,7 +119,7 @@ void ModelView::rebuildModelRenderer()
         }
         else render->cleanup();
     }
-    updateGL();
+    update();
 };
 
 void ModelView::setTextureProvider(TextureList* list)
@@ -129,30 +130,34 @@ void ModelView::setTextureProvider(TextureList* list)
 void ModelView::mousePressEvent(QMouseEvent* event)
 {
     //need to set up last position before creating delta.
-    lastPoint = event->pos();
+    lastPoint = event->globalPosition();
 };
 
 void ModelView::mouseMoveEvent(QMouseEvent* event)
 {
-    QPoint delta = lastPoint-event->pos();
+    const QPointF delta = lastPoint - event->globalPosition();
+
+    if (delta.manhattanLength() <= 0.0f)
+        return;
 
     if(event->buttons() & Qt::LeftButton)
     {
-        camera.addYaw(mouseSensitivity*delta.x());
-        camera.addPitch(mouseSensitivity*delta.y());
+        camera.addYaw(mouseSensitivity * delta.x());
+        camera.addPitch(mouseSensitivity * delta.y());
     }
     else if(event->buttons() & Qt::RightButton)
     {
-        camera.addDistance(zoomSensitivity*delta.y());
+        camera.addDistance(zoomSensitivity * delta.y());
     }
-    lastPoint = event->pos();
-    updateGL();
+
+    lastPoint = event->globalPosition();
+    update();
 };
 
 void ModelView::wheelEvent(QWheelEvent* event)
 {
-    camera.addDistance(-wheelSensitivity*event->delta());
-    updateGL();
+    camera.addDistance(-wheelSensitivity*event->angleDelta().y());
+    update();
 };
 
 void ModelView::initializeGL()
@@ -210,42 +215,40 @@ void ModelView::paintGL()
 {
     glClearColor(0.5,0.7,1.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if(render)
+
+    if (!render)
+        return;
+
+    matrixHandler->applyMatrices();
+
+    for(int i = 0; i < render->getNumGroups(); i++)
     {
-        for(int i = 0; i < render->getNumGroups(); i++)
+        if(render->getTextureUsed(i) == -1)
         {
-            if(render->getTextureUsed(i) == -1)
-            {
-                glDisable(GL_TEXTURE_2D);
-            }
-            else
-            {
-                if(textures)
-                {
-                    const DriverTexture* tex = level->textures.getTexture(render->getTextureUsed(i));
-                    if(tex)
-                    {
-                        if(tex->getFlags()&TEX_HAS_TRANSPARENCY)
-                        {
-                            glEnable(GL_ALPHA_TEST);
-                            glAlphaFunc(GL_GREATER, 0.5);
-                            //TODO: disable alpha test
-                        }
-                    }
-                    glEnable(GL_TEXTURE_2D);
-                    glBindTexture(GL_TEXTURE_2D, textures->getTexture(render->getTextureUsed(i),textures->getCurrentPalette(render->getTextureUsed(i))));
-                }
-            }
-            glCullFace(GL_BACK);
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(-1,-100);
-            render->render(i);
-            glPolygonMode(GL_BACK,GL_LINE);
-            glCullFace(GL_FRONT);
-            glDisable(GL_POLYGON_OFFSET_FILL);
-            render->render(i);
-            glCullFace(GL_BACK);
+            glDisable(GL_TEXTURE_2D);
         }
+        else if (textures)
+        {
+            const DriverTexture* tex = level->textures.getTexture(render->getTextureUsed(i));
+            if (tex && tex->getFlags() & TEX_HAS_TRANSPARENCY)
+            {
+                glEnable(GL_ALPHA_TEST);
+                glAlphaFunc(GL_GREATER, 0.5);
+                //TODO: disable alpha test
+            }
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, textures->getTexture(render->getTextureUsed(i), textures->getCurrentPalette(render->getTextureUsed(i))));
+        }
+
+        glCullFace(GL_BACK);
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(-1,-100);
+        render->render(i);
+        glPolygonMode(GL_BACK,GL_LINE);
+        glCullFace(GL_FRONT);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        render->render(i);
+        glCullFace(GL_BACK);
     }
 };
 
